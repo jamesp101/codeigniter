@@ -1,0 +1,142 @@
+:root {
+    --global-blue: #47B5EB;
+    --global-green: #43E2AD;
+    --darker-blue: #3894c1;
+}
+
+.container-login {
+    background: #EEEEEE;
+}
+
+/* Login Form */
+
+.login-box {
+    position: relative;
+    height: 100vh;
+}
+.login-box form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 50px;
+    background: var(--global-green);
+    border-radius: 10px;
+    z-index: 1;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    width: 100%;
+}
+.login-box .form-control {
+    outline: 0;
+  background: #f2f2f2;
+  width: 100%;
+  border: 0;
+  margin: 0 0 15px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
+  border-radius: 10px !important;
+}
+.login-box .btn {
+    width: 100%;
+    background: var(--global-blue);
+    border-color: var(--global-blue);
+}
+.login-box .btn:hover {
+    background: var(--darker-blue);
+    border-color: var(--darker-blue);
+}
+
+/* User Page */
+
+.container-user {
+    padding: 100px;
+}
+
+.container-user table tbody tr td img {
+    object-fit: cover;
+}
+
+#page-inner.profile {
+    margin: 0 auto;
+    width: 1140px;
+    padding: 100px 0px;
+}
+#page-inner.profile .top-part {
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+/* Main Index */
+.video-background {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100vw;
+    min-height: 100vh;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: -1;
+  }
+.main-index {
+    margin: 100px auto;
+    max-width: 800px;
+}
+.header {
+    margin: 0 auto;
+    text-align: center;
+}
+.header img {
+    width: 80px;
+    text-align: left;
+}
+.header h1 {
+    font-weight: 700;
+    font-family: "Montserrat", sans-serif;
+}
+#calendar {
+    margin: 0 auto;
+    padding: 100px 0px;
+}
+.who-we-are {
+    text-align: center;
+    margin-bottom: 50px;
+    padding-top: 50px;
+    background: #F1F1F1;
+}
+.who-we-are h2 {
+    margin-bottom: 25px;
+}
+.announcements {
+    margin-top: 25px;
+    text-align: center;
+}
+.announcement-box-item {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.regular-dashboard,
+.docs-page {
+    margin: 0 auto;
+    width: 1140px !important;
+    padding: 100px 0px !important;
+}
+.docs-page h2 {
+    text-align: center;
+}
+
+/* Forms */
+.form-group {
+    padding: 10px 0px;
+}
+
+/* Tables */
+td.buttons{
+    width: 100%;
+}
