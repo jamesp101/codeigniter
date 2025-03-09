@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------------
@@ -156,6 +156,7 @@ $route['documentations/view/(:num)'] = 'common/documentations/view_documentation
 $route['documentations/create'] = 'common/documentations/upload_documentation';
 $route['documentations/delete/(:num)'] = 'common/documentations/delete_documentation/$1';
 $route['documentations/create_folder'] = 'common/documentations/create_folder';
+$route['documentations/create_subfolder'] = 'common/documentations/create_subfolder';
 $route['documentations/folder/(:num)'] = 'common/documentations/view_folder_files/$1';
 $route['documentations/update_access/(:num)'] = 'common/documentations/update_access/$1';
 $route['documentations/delete_folder/(:num)'] = 'common/documentations/delete_folder/$1';
@@ -191,6 +192,3 @@ $route['api/offices/(:num)']['GET'] = 'api/offices/view/$1';
 $route['api/offices']['POST'] = 'api/offices/create';
 $route['api/offices/(:num)']['PUT'] = 'api/offices/update/$1';
 $route['api/offices/(:num)']['DELETE'] = 'api/offices/delete/$1';
-
-
-
