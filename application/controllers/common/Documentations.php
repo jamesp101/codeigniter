@@ -129,10 +129,10 @@ class Documentations extends MY_Controller
 
 			$this->Folder_model->create_subfolder($folder_name, $parent_id);
 			$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
+			redirect('documentations/folder/' . $parent_id);
 		} else {
 			$this->session->set_flashdata('error', `Access denied.`);
 		}
-		redirect('documentations');
 	}
 
 	public function view_folder_files($folder_id)
@@ -143,7 +143,8 @@ class Documentations extends MY_Controller
 			->join('folder_access', 'folder_access.folder_id = storage_documentations.folder_id')
 			->where('folder_access.folder_id', $folder_id)
 			->group_by('storage_documentations.File_ID')
-			->get()->result_array();
+			->get()
+			->result_array();
 
 		$folders = $this->db->select('*')
 			->from('folders')
