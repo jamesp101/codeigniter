@@ -150,10 +150,18 @@ class Documentations extends MY_Controller
 			->where('parent_id', $folder_id)
 			->get()
 			->result_array();
+		$current_folder = $this->db->select('*')
+			->from('folders')
+			->where('id', $folder_id)
+			->get()
+			->result_array()[0];
+
+
 
 		$data["documentations"] = $files;
 		$data['subfolders'] = $folders;
 		$data["folder_id"] = $folder_id;
+		$data['current_folder'] = $current_folder;
 
 		$this->load->view('users/documentation_files', $data);
 	}

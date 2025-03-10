@@ -106,6 +106,20 @@
 				</tr>
 			</thead>
 			<tbody>
+				<tr>
+					<td>
+						<?php $parent_link =
+							$current_folder['parent_id'] === NULL
+							? '/documentations/'
+							:  $current_folder['parent_id']
+						?>
+						<a href="<?= $parent_link ?>">
+							📁 ..
+						</a>
+					</td>
+					<td />
+					<td />
+				</tr>
 
 				<?php foreach ($subfolders as $folder): ?>
 					<tr>
