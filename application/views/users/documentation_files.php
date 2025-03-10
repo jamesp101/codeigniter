@@ -138,7 +138,7 @@
 
 				<?php foreach ($documentations as $documentation): ?>
 					<tr>
-						<td><?= $documentation['File_Title']; ?></td>
+						<td>📄 <?= $documentation['File_Title']; ?></td>
 						<td><?= $documentation["Date_Uploaded"]; ?></td>
 						<td>
 							<a href="<?= site_url('documentations/view/' . $documentation['File_ID']) ?>" class="btn btn-warning" target="_blank">
