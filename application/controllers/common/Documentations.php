@@ -21,82 +21,49 @@ class Documentations extends MY_Controller
 
 	public function index()
 	{
-		$user_role = $this->session->userdata('role');
-		$user_office = $this->session->userdata('office');
-		$data["test"] = [];
-		// show_error('User.', $user_role);
-		if ($user_role === 'Document Controller' || $user_role === 'Director for QAIE' || $user_role === 'QAIE Management Officer') {
-			$this->db->select('ID_Office, Office_Name');
-			$query = $this->db->get('z_office');
-			$data['offices'] = $query->result();
+		$session_role = $this->session->userdata('role');
+		$session_office = $this->session->userdata('office');
 
-			// Join folders, folder_access, and z_office tables
-			$this->db->select('folders.*, GROUP_CONCAT(z_office.Office_Name) AS access_list');
-			$this->db->from('folders');
-			$this->db->join('folder_access', 'folders.id = folder_access.folder_id', 'left');
-			$this->db->join('z_office', 'folder_access.ID_Office = z_office.ID_Office', 'left');
-			$this->db->group_by('folders.id');
-			$this->db->where('parent_id', NULL);
 
-			// Execute the query
-			$query = $this->db->get();
-			$result = $query->result_array();
+		$result = $this->db
+			->from('folders')
+			->select('folders.*, GROUP_CONCAT(z_office.Office_Name) AS access_list')
+			->join('folder_access', 'folders.id = folder_access.folder_id', 'left')
+			->join('z_office', 'folder_access.ID_Office = z_office.ID_Office', 'left')
+			->group_by('folders.id')
+			->where('parent_id', NULL)
+			->get()
+			->result_array();
 
-			// Format the result
-			$folders = [];
-			foreach ($result as $row) {
-				$folders[] = [
-					'id' => $row['id'],
-					'name' => $row['name'],
-					'created_at' => $row['created_at'],
-					'access' => $row['access_list'] ? explode(',', $row['access_list']) : []
-				];
+
+
+		$data['folders'] = array_map(function ($row) use ($session_office) {
+
+			return [
+				'id' => $row['id'],
+				'name' => $row['name'],
+				'created_at' => $row['created_at'],
+				'access' => $row['access_list']
+					? explode(',', $row['access_list'])
+					: []
+
+			];
+		}, $result);
+
+		$data['folders'] = array_filter(
+			$data['folders'],
+			function ($row) use ($session_office, $session_role) {
+				$special_access = ['Document Controller', 'Director for QAIE', 'QAIE Managment'];
+
+				$has_access = in_array($session_office, $row['access']);
+				$has_special_access = in_array($session_role, $special_access);
+
+				return $has_access || $has_special_access;
 			}
-
-			$data['folders'] = $folders;
-		} else {
-			$this->db->select('ID_Office');
+		);
 
 
-			$this->db->where('Office_Name', $user_office);
-			// show_error('User.', $user_office);
-			$office_info = $this->db->get('z_office')->row();
-			$office_id = $office_info->ID_Office;
-			// Fetch files related to user's office
-			// $this->db->select('folders.*');
-			// $this->db->from('folders');
-			// $this->db->join('folder_access', 'folder_access.folder_id = folders.id');
-			// $this->db->where('folder_access.ID_Office', $office_id);
 
-
-			// Join folders, folder_access, and z_office tables
-			$this->db->select('folders.*, GROUP_CONCAT(z_office.Office_Name) AS access_list');
-			$this->db->from('folders');
-			$this->db->join('folder_access', 'folders.id = folder_access.folder_id', 'left');
-			$this->db->join('z_office', 'folder_access.ID_Office = z_office.ID_Office', 'left');
-			$this->db->where('folder_access.ID_Office', $office_id);
-			$this->db->group_by('folders.id');
-
-			// Execute the query
-			$query = $this->db->get();
-			$result = $query->result_array();
-
-
-			// Format the result
-			$folders = [];
-			foreach ($result as $row) {
-				$folders[] = [
-					'id' => $row['id'],
-					'name' => $row['name'],
-					'created_at' => $row['created_at'],
-					'access' => $row['access_list'] ? explode(',', $row['access_list']) : []
-				];
-			}
-
-			$data['folders'] = $folders;
-
-			// $data["folders"] = $this->db->get()->result_array();
-		}
 		$this->load->view('users/documentation_folders', $data);
 	}
 
@@ -139,6 +106,30 @@ class Documentations extends MY_Controller
 	public function view_folder_files($folder_id)
 	{
 
+		$session_office = $this->session->userdata('office');
+
+		$user_office = $this->db
+			->from('z_office')
+			->select('*')
+			->where('Office_Name', $session_office)
+			->get()
+			->result_array()[0];
+
+		$access = $this->db
+			->from('folder_access')
+			->select('*')
+			->where('Id_Office', $user_office['ID_Office'])
+			->where('folder_id', $folder_id)
+			->get()
+			->result_array();
+
+		if (sizeof($access) <= 0) {
+			redirect('/documentations?errors=accessdenied');
+			return;
+		}
+
+
+
 		$files = $this->db->select('storage_documentations.*')
 			->from('storage_documentations')
 			->join('folder_access', 'folder_access.folder_id = storage_documentations.folder_id')
@@ -158,6 +149,8 @@ class Documentations extends MY_Controller
 			->where('id', $folder_id)
 			->get()
 			->result_array()[0];
+
+
 
 
 
