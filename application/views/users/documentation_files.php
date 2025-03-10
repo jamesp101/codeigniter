@@ -137,7 +137,6 @@
 				<?php endforeach; ?>
 
 				<?php foreach ($documentations as $documentation): ?>
-
 					<tr>
 						<td><?= $documentation['File_Title']; ?></td>
 						<td><?= $documentation["Date_Uploaded"]; ?></td>

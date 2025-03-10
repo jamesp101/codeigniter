@@ -109,7 +109,6 @@ class Documentations extends MY_Controller
 
 			$data = [
 				'name' => $folder_name,
-				// 'parent_id' => $this->input->post('parent_id'),  // For nested folders
 				'created_at' => date('Y-m-d H:i:s')
 			];
 			$this->Folder_model->create_folder($data, $office_ids);
@@ -123,16 +122,18 @@ class Documentations extends MY_Controller
 	public function create_subfolder()
 	{
 		$user_role = $this->session->userdata('role');
-		if ($user_role === 'Document Controller') {
-			$folder_name = $this->input->post('subfolder_name');
-			$parent_id = $this->input->post('folder_id'); // An array of selected office IDs
+		if ($user_role !== 'Document Controller') {
 
-			$this->Folder_model->create_subfolder($folder_name, $parent_id);
-			$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
-			redirect('documentations/folder/' . $parent_id);
-		} else {
 			$this->session->set_flashdata('error', `Access denied.`);
+			return;
 		}
+
+		$folder_name = $this->input->post('subfolder_name');
+		$parent_id = $this->input->post('folder_id'); // An array of selected office IDs
+
+		$this->Folder_model->create_subfolder($folder_name, $parent_id);
+		$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
+		redirect('documentations/folder/' . $parent_id);
 	}
 
 	public function view_folder_files($folder_id)
@@ -151,6 +152,7 @@ class Documentations extends MY_Controller
 			->where('parent_id', $folder_id)
 			->get()
 			->result_array();
+
 		$current_folder = $this->db->select('*')
 			->from('folders')
 			->where('id', $folder_id)
