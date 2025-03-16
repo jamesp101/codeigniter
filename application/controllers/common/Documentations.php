@@ -1,6 +1,13 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+
+/**
+ * @property CI_Session $session
+ * @property CI_DB $db
+ * @property CI_Input $input
+ * @property Folder_model $Folder_model
+ */
 class Documentations extends MY_Controller
 {
 
@@ -37,8 +44,7 @@ class Documentations extends MY_Controller
 
 
 
-		$data['folders'] = array_map(function ($row) use ($session_office) {
-
+		$data['folders'] = array_map(function ($row) {
 			return [
 				'id' => $row['id'],
 				'name' => $row['name'],
@@ -62,6 +68,11 @@ class Documentations extends MY_Controller
 			}
 		);
 
+		$data['offices'] = $this
+			->db
+			->select('ID_Office, Office_Name')
+			->get('z_office')
+			->result();
 
 
 		$this->load->view('users/documentation_folders', $data);
@@ -81,7 +92,7 @@ class Documentations extends MY_Controller
 			$this->Folder_model->create_folder($data, $office_ids);
 			$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
 		} else {
-			$this->session->set_flashdata('error', `Access denied.`);
+			redirect('/documentations?errors=accessdenied');
 		}
 		redirect('documentations');
 	}
@@ -91,7 +102,8 @@ class Documentations extends MY_Controller
 		$user_role = $this->session->userdata('role');
 		if ($user_role !== 'Document Controller') {
 
-			$this->session->set_flashdata('error', `Access denied.`);
+
+			redirect('/documentations?errors=accessdenied');
 			return;
 		}
 
@@ -107,28 +119,30 @@ class Documentations extends MY_Controller
 	{
 
 		$session_office = $this->session->userdata('office');
+		$special_access = ['Document Controller', 'Director for QAIE', 'QAIE Managment'];
 
-		$user_office = $this->db
-			->from('z_office')
-			->select('*')
-			->where('Office_Name', $session_office)
-			->get()
-			->result_array()[0];
+		if (in_array($session_office, $special_access)) {
 
-		$access = $this->db
-			->from('folder_access')
-			->select('*')
-			->where('Id_Office', $user_office['ID_Office'])
-			->where('folder_id', $folder_id)
-			->get()
-			->result_array();
+			$user_office = $this->db
+				->from('z_office')
+				->select('*')
+				->where('Office_Name', $session_office)
+				->get()
+				->result_array()[0];
 
-		if (sizeof($access) <= 0) {
-			redirect('/documentations?errors=accessdenied');
-			return;
+			$access = $this->db
+				->from('folder_access')
+				->select('*')
+				->where('Id_Office', $user_office['ID_Office'])
+				->where('folder_id', $folder_id)
+				->get()
+				->result_array();
+
+			if (sizeof($access) <= 0) {
+				redirect('/documentations?errors=accessdenied');
+				return;
+			}
 		}
-
-
 
 		$files = $this->db->select('storage_documentations.*')
 			->from('storage_documentations')
@@ -137,6 +151,9 @@ class Documentations extends MY_Controller
 			->group_by('storage_documentations.File_ID')
 			->get()
 			->result_array();
+
+
+
 
 		$folders = $this->db->select('*')
 			->from('folders')
