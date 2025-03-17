@@ -116,7 +116,7 @@ class Documentations extends MY_Controller
 		$parent_id = $this->input->post('folder_id'); // An array of selected office IDs
 
 		$this->Folder_model->create_subfolder($folder_name, $parent_id);
-		$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
+		$this->session->set_flashdata('success', $folder_name . ' folder created successfully.');
 		redirect('documentations/folder/' . $parent_id);
 	}
 
@@ -267,7 +267,7 @@ class Documentations extends MY_Controller
 		try {
 			$this->Documentation_model->delete_documentation($file_id);
 			$this->session->set_flashdata('success', 'Documentation ' . $file_id . ' has been deleted.');
-		} catch (\Throwable $th) {
+		} catch (\Throwable) {
 			$this->session->set_flashdata('error', 'Error deleting ' . $file_id);
 		}
 		redirect('documentations');
