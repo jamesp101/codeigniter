@@ -7,6 +7,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_DB $db
  * @property CI_Input $input
  * @property Folder_model $Folder_model
+ * @property CI_Upload $upload
+ * @property Documentation_model $Documentation_model
  */
 class Documentations extends MY_Controller
 {
@@ -81,19 +83,23 @@ class Documentations extends MY_Controller
 	public function create_folder()
 	{
 		$user_role = $this->session->userdata('role');
-		if ($user_role === 'Document Controller') {
-			$folder_name = $this->input->post('folder_name');
-			$office_ids = $this->input->post('office_ids'); // An array of selected office IDs
 
-			$data = [
-				'name' => $folder_name,
-				'created_at' => date('Y-m-d H:i:s')
-			];
-			$this->Folder_model->create_folder($data, $office_ids);
-			$this->session->set_flashdata('success', `${folder_name} folder created successfully.`);
-		} else {
+		if ($user_role !== 'Document Controller') {
 			redirect('/documentations?errors=accessdenied');
+			return;
 		}
+
+
+		$folder_name = $this->input->post('folder_name');
+		$office_ids = $this->input->post('office_ids'); // An array of selected office IDs
+
+		$data = [
+			'name' => $folder_name,
+			'created_at' => date('Y-m-d H:i:s')
+		];
+
+		$this->Folder_model->create_folder($data, $office_ids);
+
 		redirect('documentations');
 	}
 
@@ -101,7 +107,6 @@ class Documentations extends MY_Controller
 	{
 		$user_role = $this->session->userdata('role');
 		if ($user_role !== 'Document Controller') {
-
 
 			redirect('/documentations?errors=accessdenied');
 			return;
@@ -181,50 +186,53 @@ class Documentations extends MY_Controller
 
 	public function view_documentation($file_id)
 	{
-		// Check if file ID is provided
-		if (isset($file_id)) {
-			// Query to fetch the file details from the database
-			$this->db->where('File_ID', $file_id);
-			$query = $this->db->get('storage_documentations');
 
-			if ($query->num_rows() > 0) {
-				$file_data = $query->row();
-				$file_name = $file_data->File_Name;
-				$user_id = $file_data->User_ID;
-
-				// Construct the correct file path
-				$file_path = FCPATH . 'files_documentations/' . $user_id . '/' . $file_name;
-				ob_start(); // Start output buffering
-				// Check if the file exists
-				if (file_exists($file_path)) {
-					header('Content-Type: application/pdf');
-					header('Content-Disposition: inline; filename="' . $file_name . '"');
-					header('Content-Transfer-Encoding: binary');
-					header('Accept-Ranges: bytes');
-
-					// Output the file
-					@readfile($file_path);
-					// readfile($file_path);
-				} else {
-					log_message('error', 'File does not exist at path: ' . $file_path);
-					show_404();
-				}
-				ob_end_flush(); // End output buffering
-			} else {
-				// Handle the case where no file is found
-				show_404();
-			}
-		} else {
-			// Handle the case where no file ID is provided
+		if (!isset($file_id)) {
 			show_404();
+			return;
 		}
+
+
+		$this->db->where('File_ID', $file_id);
+		$query = $this->db->get('storage_documentations');
+
+
+		if (!($query->num_rows() > 0)) {
+
+			show_404();
+			return;
+		}
+
+
+		$file_data = $query->row();
+		$file_name = $file_data->File_Name;
+		$user_id = $file_data->User_ID;
+
+		$file_path = FCPATH . 'files_documentations/' . $user_id . '/' . $file_name;
+		ob_start();
+		if (!file_exists($file_path)) {
+
+			log_message('error', 'File does not exist at path: ' . $file_path);
+			show_404();
+			return;
+		}
+
+
+		header('Content-Type: application/pdf');
+		header('Content-Disposition: inline; filename="' . $file_name . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Accept-Ranges: bytes');
+
+		// Output the file
+		@readfile($file_path);
+		// readfile($file_path);
+
 	}
 
 
 	public function upload_documentation()
 	{
 		$folder_id = $this->input->post('folder_id');
-		// Handle file upload and form data here
 		$config['upload_path'] = './files_documentations/' . $this->session->userdata('user_id') . '/';
 		$config['allowed_types'] = 'pdf|docx|txt';
 		$config['max_size'] = 2000; // Set max file size (in KB)
@@ -238,20 +246,20 @@ class Documentations extends MY_Controller
 			$data['error'] = $this->upload->display_errors();
 			$this->session->set_flashdata('error', $data['error']);
 			redirect('documentations/folder/' . $folder_id);
-		} else {
-			$upload_data = $this->upload->data();
-			$documentation_data = array(
-				'File_Title' => $this->input->post('File_Title_Brkt'),
-				'File_Type' => "application/pdf",
-				'File_Name' => $upload_data['file_name'],
-				'User_ID' => $this->session->userdata('user_id'),
-				'Date_Uploaded' => date("Y-m-d H:i:s"),
-				'folder_id' => $folder_id
-			);
-
-			$this->Documentation_model->insert_documentation($documentation_data);
-			redirect('documentations/folder/' . $folder_id);
+			return;
 		}
+		$upload_data = $this->upload->data();
+		$documentation_data = array(
+			'File_Title' => $this->input->post('File_Title_Brkt'),
+			'File_Type' => "application/pdf",
+			'File_Name' => $upload_data['file_name'],
+			'User_ID' => $this->session->userdata('user_id'),
+			'Date_Uploaded' => date("Y-m-d H:i:s"),
+			'folder_id' => $folder_id
+		);
+
+		$this->Documentation_model->insert_documentation($documentation_data);
+		redirect('documentations/folder/' . $folder_id);
 	}
 
 	public function delete_documentation($file_id)
@@ -267,20 +275,13 @@ class Documentations extends MY_Controller
 
 	public function update_access($folder_id)
 	{
-		// Load the model if using a model (optional)
-		// $this->load->model('Folder_model');
-
-		// Get the selected office IDs from the form
 		$office_ids = $this->input->post('office_ids');
 
-		// Start a transaction to ensure data consistency
 		$this->db->trans_start();
 
-		// 1. Delete existing access for this folder
 		$this->db->where('folder_id', $folder_id);
 		$this->db->delete('folder_access');
 
-		// 2. Insert new access entries
 		if (!empty($office_ids)) {
 			$access_data = [];
 			foreach ($office_ids as $office_id) {
@@ -289,23 +290,17 @@ class Documentations extends MY_Controller
 					'ID_Office' => $office_id
 				];
 			}
-			// Batch insert new access records
 			$this->db->insert_batch('folder_access', $access_data);
 		}
 
-		// Complete the transaction
 		$this->db->trans_complete();
 
-		// Check for successful transaction
 		if ($this->db->trans_status() === FALSE) {
-			// Rollback and display an error message
 			$this->session->set_flashdata('error', 'Failed to update folder access.');
 		} else {
-			// Success message
 			$this->session->set_flashdata('success', 'Folder access updated successfully.');
 		}
 
-		// Redirect back to the folder page or wherever appropriate
 		redirect('documentations');  // Adjust the redirect path as needed
 	}
 
