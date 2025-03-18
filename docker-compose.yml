@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes  # Allow root login without a password
+      - MYSQL_DATABASE=qaadmavl_qaadms   # Create a default database
+    volumes:
+      - ./DATA_DUMP:/docker-entrypoint-initdb.d  # SQL dump file(s)
+    ports:
+      - "3306:3306"
