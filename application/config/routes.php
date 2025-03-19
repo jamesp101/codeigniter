@@ -56,6 +56,7 @@ $route['user_controller'] = 'User';
 $route['login'] = 'Authentication';
 $route['auth/login_submit'] = 'authentication/login_submit';
 $route['auth/logout'] = 'authentication/logout';
+$route['captcha'] = 'CaptchaController';
 
 
 // department
