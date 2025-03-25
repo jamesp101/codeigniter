@@ -149,10 +149,10 @@ $route['qaiedirector/dcrform/update/(:any)'] = 'common/dcrform/update_dcrform_qa
 
 // $route['profile/(:any)?'] = 'admin/UserController/profile/$1';
 $route['profile'] = 'admin/UserController/profile';
-$route['documentations'] = 'common/documentations/index';
 
 
 // documentations
+$route['documentations'] = 'common/documentations/index';
 $route['documentations/view/(:num)'] = 'common/documentations/view_documentation/$1';
 $route['documentations/create'] = 'common/documentations/upload_documentation';
 $route['documentations/delete/(:num)'] = 'common/documentations/delete_documentation/$1';
@@ -161,6 +161,10 @@ $route['documentations/create_subfolder'] = 'common/documentations/create_subfol
 $route['documentations/folder/(:num)'] = 'common/documentations/view_folder_files/$1';
 $route['documentations/update_access/(:num)'] = 'common/documentations/update_access/$1';
 $route['documentations/delete_folder/(:num)'] = 'common/documentations/delete_folder/$1';
+/// HTMX
+$route['documentations/get_users_access/(:num)'] = 'common/documentations/get_users_access/$1';
+$route['documentations/add_user_access/(:num)/(:num)']['POST'] = 'common/documentations/add_user_access/$1/$2';
+$route['documentations/remove_user_access/(:num)/(:num)']['POST'] = 'common/documentations/remove_user_access/$1/$2';
 
 // events
 $route['events/add_event']['POST'] = 'common/EventController/add_event';

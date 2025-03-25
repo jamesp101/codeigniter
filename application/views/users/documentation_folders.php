@@ -21,8 +21,13 @@ $errors = explode(',', $this->input->get('errors'));
 	</script>
 <?php endif; ?>
 
-<div class="container " style="margin-top:25px;">
+<script>
+	document.removeUserList = () => {
+		document.getElementById('users-list').innerHTML = ''
+	}
+</script>
 
+<div class="container " style="margin-top:25px;">
 	<!-- Modal -->
 	<div class="modal fade" id="addEManual" tabindex="-1" aria-labelledby="addEManualLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -98,6 +103,36 @@ $errors = explode(',', $this->input->get('errors'));
 
 </div>
 
+
+<div class="modal fade" id="EditUserAccess">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">
+					User Access
+				</h1>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div id="users-list">
+			</div>
+
+			<div class="d-flex align-items-center justify-content-center">
+				<div id="EditUserLoading" class="spinner-border htmx-indicator" role="status">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-bs-dismiss="modal"> OK </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 <div class="docs-page">
 	<h2>Documentations</h2>
 	<div class="container" style="margin-top:25px">
@@ -129,9 +164,7 @@ $errors = explode(',', $this->input->get('errors'));
 				</tr>
 			</thead>
 			<tbody>
-				<?php
-				foreach ($folders as $folder):
-				?>
+				<?php foreach ($folders as $folder): ?>
 					<tr>
 						<td>
 							<a href="<?= site_url('/documentations/folder/' . $folder['id']); ?>">
@@ -144,13 +177,102 @@ $errors = explode(',', $this->input->get('errors'));
 						</td>
 						<?php if ($this->session->userdata('role') === 'Document Controller'): ?>
 							<td>
-								<button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#EditAccess' . $folder['id'] . '">Edit User Access</button>&nbsp;
-								<button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal_delete' . $folder['id'] . '">Delete Folder</button>
+								<button class="btn btn-outline-primary" data-bs-toggle="modal"
+									data-bs-target="#EditAccess<?= $folder['id'] ?>">
+									<span class=" fa fa-building" />
+								</button>
+								<button class="btn btn-outline-primary"
+									hx-get="/documentations/get_users_access/<?= $folder['id'] ?>"
+									hx-swap="outerHTML"
+									hx-target="#users-list"
+									hx-indicator="#EditUserLoading"
+									data-bs-toggle="modal"
+									onclick="removeUserList()"
+									data-bs-target="#EditUserAccess">
+									<span class=" fa fa-user" />
+								</button>
+
+								<button class="btn btn-danger"
+									data-bs-toggle="modal"
+									data-bs-target="#modal_delete<?= $folder['id'] ?>">
+									<span class=" fa fa-trash" />
+								</button>
 							</td>
 						<?php endif; ?>
 
 
+
 						<!-- Modal -->
+						<div class="modal fade" id="EditAccess<?= $folder['id'] ?>" tabindex="-1" aria-labelledby="addEManualLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-centered">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="exampleModalLabel">Office Access</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<?= form_open_multipart('documentations/update_access/' . $folder['id']); ?>
+									<div class="modal-body">
+										<div class="form-group">
+											<label for="file_title">Office Access Control</label>
+											<div class="row">
+												<?php if (!empty($offices)): ?>
+													<?php
+													$half = ceil(count($offices) / 2); // Calculate the halfway point
+													$chunks = array_chunk($offices, $half); // Split the offices array into two chunks
+													?>
+
+													<!-- First column -->
+													<div class="col-md-6">
+														<?php foreach ($chunks[0] as $office): ?>
+															<div class="form-check">
+																<input
+																	class="form-check-input"
+																	type="checkbox"
+																	id="office_<?= $office->ID_Office; ?>"
+																	name="office_ids[]"
+																	value="<?= $office->ID_Office; ?>"
+																	<?= in_array($office->Office_Name, $folder['access']) ? 'checked' : ''; ?>>
+																<label class="form-check-label" for="office_<?= $office->ID_Office; ?>">
+																	<?= $office->Office_Name; ?>
+																</label>
+															</div>
+														<?php endforeach; ?>
+													</div>
+
+													<!-- Second column -->
+													<div class="col-md-6">
+														<?php foreach ($chunks[1] as $office): ?>
+															<div class="form-check">
+																<input
+																	class="form-check-input"
+																	type="checkbox"
+																	id="office_<?= $office->ID_Office; ?>"
+																	name="office_ids[]"
+																	value="<?= $office->ID_Office; ?>"
+																	<?= in_array($office->Office_Name, $folder['access']) ? 'checked' : ''; ?>>
+																<label class="form-check-label" for="office_<?= $office->ID_Office; ?>">
+																	<?= $office->Office_Name; ?>
+																</label>
+															</div>
+														<?php endforeach; ?>
+													</div>
+
+												<?php else: ?>
+													<div>No offices available</div>
+												<?php endif; ?>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary">Update Access</button>
+									</div>
+									<?= form_close(); ?>
+								</div>
+							</div>
+						</div>
+
+
 						<div class="modal fade" id="EditAccess<?= $folder['id'] ?>" tabindex="-1" aria-labelledby="addEManualLabel" aria-hidden="true">
 							<div class="modal-dialog">
 								<div class="modal-content">

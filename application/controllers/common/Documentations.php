@@ -1,4 +1,7 @@
 <?php
+
+use Soap\Sdl;
+
 defined('BASEPATH') or exit('No direct script access allowed');
 
 
@@ -8,6 +11,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * @property CI_Input $input
  * @property Folder_model $Folder_model
  * @property CI_Upload $upload
+ * @property CI_Output $output
  * @property Documentation_model $Documentation_model
  */
 class Documentations extends MY_Controller
@@ -334,5 +338,68 @@ class Documentations extends MY_Controller
 	}
 
 
-	public function add_user_access() {}
+	public function get_users_access($folder_id)
+	{
+
+		$data['access'] = $this->db
+			->from('folder_access')
+			->select('z_office.Office_Name')
+			->where('folder_id', $folder_id)
+			->join('z_office', 'folder_access.ID_Office = z_office.Id_Office')
+			->get()
+			->result_array();
+
+		$data['users'] = $this->db->get('all_users')->result_array();
+
+		$data['access'] = array_map(function ($e) {
+			return $e['Office_Name'];
+		}, $data['access']);
+
+		$data['folder_id'] = $folder_id;
+
+		$user_access = $this->db
+			->from('user_folder_access')
+			->select('*')
+			->where('folder_id', $folder_id)
+			->get()
+			->result_array();
+
+
+		$data['users'] = array_map(function ($e) use ($user_access) {
+			$d = $e;
+
+
+			$has_access = array_filter($user_access, function ($e) use ($d) {
+				return $d['user_id'] === $e['user_id'];
+			});
+			$has_access = count($has_access) > 0;
+
+			$d['has_access'] = $has_access;
+
+			return $d;
+		}, $data['users']);
+
+
+
+		$this->load->view('users/dialogs/user_document_list', $data);
+	}
+
+	public function add_user_access($folder_id, $user_id)
+	{
+		$this->db
+			->insert('user_folder_access', [
+				'folder_id' => $folder_id,
+				'user_id' => $user_id
+			]);
+
+		$this->output->set_content_type(200)->set_output(json_encode(['success' => true]));
+	}
+	public function remove_user_access($folder_id, $user_id)
+	{
+		$this->db
+			->delete('user_folder_access', [
+				'folder_id' => $folder_id,
+				'user_id' => $user_id,
+			]);
+	}
 }
