@@ -267,7 +267,7 @@ class Documentations extends MY_Controller
 		try {
 			$this->Documentation_model->delete_documentation($file_id);
 			$this->session->set_flashdata('success', 'Documentation ' . $file_id . ' has been deleted.');
-		} catch (\Throwable) {
+		} catch (Throwable $e) {
 			$this->session->set_flashdata('error', 'Error deleting ' . $file_id);
 		}
 		redirect('documentations');
@@ -332,4 +332,7 @@ class Documentations extends MY_Controller
 		// Redirect back to the folder list page or wherever appropriate
 		redirect('documentations');  // Adjust the redirect path as needed
 	}
+
+
+	public function add_user_access() {}
 }
