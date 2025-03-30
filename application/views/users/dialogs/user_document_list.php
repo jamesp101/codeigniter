@@ -9,12 +9,11 @@
 
 
 		if (checkbox.checked) {
-			await fetch(`add_user_access/${folder}/${user}`, {
+			await fetch(`documentations/add_user_access/${folder}/${user}`, {
 				method: 'post'
 			});
 		} else {
-
-			await fetch(`remove_user_access/${folder}/${user}`, {
+			await fetch(`documentations/remove_user_access/${folder}/${user}`, {
 				method: 'post'
 			});
 		}
