@@ -36,41 +36,48 @@ class Documentations extends MY_Controller
 	{
 		$session_role = $this->session->userdata('role');
 		$session_office = $this->session->userdata('office');
+		$session_office_id = $this->session->userdata('office_id');
+		$session_user_id = $this->session->userdata('user_id');
 
 
-		$result = $this->db
+
+		$result = $this->db->select('folders.*, 
+    GROUP_CONCAT(DISTINCT z_office.Office_Name) AS access_list, 
+    GROUP_CONCAT(DISTINCT user_folder_access.user_id) AS user_ids', false)
 			->from('folders')
-			->select('folders.*, GROUP_CONCAT(z_office.Office_Name) AS access_list')
 			->join('folder_access', 'folders.id = folder_access.folder_id', 'left')
 			->join('z_office', 'folder_access.ID_Office = z_office.ID_Office', 'left')
-			->group_by('folders.id')
-			->where('parent_id', NULL)
+			->join('user_folder_access', 'user_folder_access.folder_id = folders.id', 'left')
+			->group_by('folders.id', NULL)
 			->get()
 			->result_array();
 
 
-
 		$data['folders'] = array_map(function ($row) {
+
 			return [
 				'id' => $row['id'],
 				'name' => $row['name'],
 				'created_at' => $row['created_at'],
-				'access' => $row['access_list']
+				'access' => $row['access_list'] !== NULL
 					? explode(',', $row['access_list'])
-					: []
-
+					: [],
+				'user_ids' => $row['user_ids'] !== NULL
+					? explode(',', $row['user_ids'])
+					: [],
 			];
 		}, $result);
 
 		$data['folders'] = array_filter(
 			$data['folders'],
-			function ($row) use ($session_office, $session_role) {
+			function ($row) use ($session_office, $session_role, $session_user_id) {
 				$special_access = ['Document Controller', 'Director for QAIE', 'QAIE Managment'];
 
 				$has_access = in_array($session_office, $row['access']);
 				$has_special_access = in_array($session_role, $special_access);
+				$has_user_access = in_array($session_user_id, $row['user_ids']);
 
-				return $has_access || $has_special_access;
+				return $has_access || $has_special_access || $has_user_access;
 			}
 		);
 
@@ -130,27 +137,34 @@ class Documentations extends MY_Controller
 		$session_office = $this->session->userdata('office');
 		$special_access = ['Document Controller', 'Director for QAIE', 'QAIE Managment'];
 
-		if (in_array($session_office, $special_access)) {
+		$folder = $this->db->from('folders')
+			->select('*')
+			->get()
+			->result_array()[0];
 
-			$user_office = $this->db
-				->from('z_office')
-				->select('*')
-				->where('Office_Name', $session_office)
-				->get()
-				->result_array()[0];
 
-			$access = $this->db
-				->from('folder_access')
-				->select('*')
-				->where('Id_Office', $user_office['ID_Office'])
-				->where('folder_id', $folder_id)
-				->get()
-				->result_array();
+		$base_folder_id = $folder['base_folder_id'];
 
-			if (sizeof($access) <= 0) {
-				redirect('/documentations?errors=accessdenied');
-				return;
-			}
+		$folder_access = $this->db->from('folder_access')
+			->select('*')
+			->where('folder_id', $base_folder_id)
+			->get()
+			->result_array();
+
+		$user_folder_access = $this->db->from('user_folder_access')
+			->select('*')
+			->where('user_id', $this->session->userdata('user_id'))
+			->get()
+			->result_array();
+
+		$has_special_access = in_array($session_office, $special_access);
+		$has_folder_access = sizeof($folder_access) <= 0;
+		$has_user_access = sizeof($user_folder_access) <= 0;
+
+
+		// Redirect if the user has no access
+		if (!($has_special_access || $has_folder_access || $has_user_access)) {
+			return redirect('/documentations?=errorsaccesdenied');
 		}
 
 		$files = $this->db->select('storage_documentations.*')
@@ -160,9 +174,6 @@ class Documentations extends MY_Controller
 			->group_by('storage_documentations.File_ID')
 			->get()
 			->result_array();
-
-
-
 
 		$folders = $this->db->select('*')
 			->from('folders')
@@ -175,9 +186,6 @@ class Documentations extends MY_Controller
 			->where('id', $folder_id)
 			->get()
 			->result_array()[0];
-
-
-
 
 
 		$data["documentations"] = $files;

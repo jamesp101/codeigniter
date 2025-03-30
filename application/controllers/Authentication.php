@@ -61,6 +61,7 @@ class Authentication extends CI_Controller
 			// Password matches, set session data
 			$this->session->set_userdata('username', $user->username);
 			$this->session->set_userdata('user_id', $user->user_id);
+			$this->session->set_userdata('office_id', $user->office_id);
 			$this->session->set_userdata('role', $user->type);
 			$this->session->set_userdata('office', $user->office);
 			$this->session->set_userdata('avatar', $user->my_img);

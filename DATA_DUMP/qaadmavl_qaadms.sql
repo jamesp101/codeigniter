@@ -1550,7 +1550,24 @@ ALTER TABLE `z_department`
 --
 ALTER TABLE `z_office`
   MODIFY `ID_Office` int(200) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+
+
+CREATE TABLE
+  `user_folder_access` (
+    `user_id` int(11) DEFAULT NULL,
+    `folder_id` int(11) DEFAULT NULL
+  );
+
+ALTER TABLE `folders`
+	ADD COLUMN base_folder_id int(200);
+
+ALTER TABLE `folders`
+	ADD COLUMN is_archived boolean default false;
+
 COMMIT;
+
+
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

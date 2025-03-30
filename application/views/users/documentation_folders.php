@@ -25,9 +25,13 @@ $errors = explode(',', $this->input->get('errors'));
 	document.removeUserList = () => {
 		document.getElementById('users-list').innerHTML = ''
 	}
+
+	document.archiveDocument = async (id) => {
+		const archive = await fetch();
+	}
 </script>
 
-<div class="container " style="margin-top:25px;">
+<div class="" style="margin-top:25px;">
 	<!-- Modal -->
 	<div class="modal fade" id="addEManual" tabindex="-1" aria-labelledby="addEManualLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -185,11 +189,18 @@ $errors = explode(',', $this->input->get('errors'));
 									hx-get="/documentations/get_users_access/<?= $folder['id'] ?>"
 									hx-swap="outerHTML"
 									hx-target="#users-list"
-									hx-indicator="#EditUserLoading"
+									hx-indicator="#EditUserLoadingoutline-secondary"
 									data-bs-toggle="modal"
 									onclick="removeUserList()"
 									data-bs-target="#EditUserAccess">
 									<span class=" fa fa-user" />
+								</button>
+
+
+								<button class="btn btn-outline-secondary"
+									data-bs-toggle="modal"
+									data-bs-target="#modal_delete<?= $folder['id'] ?>">
+									<span class="fa fa-archive" />
 								</button>
 
 								<button class="btn btn-danger"
