@@ -148,6 +148,10 @@
 							</a>
 
 							<?php if ($this->session->userdata('role') === 'Document Controller'): ?>
+
+								<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
+									<i class="fa fa-archive"></i>
+								</button>
 								<button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
 									<i class="fa fa-trash"></i>
 								</button>
