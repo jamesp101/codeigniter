@@ -15,33 +15,39 @@
 			maxLength: 'First Name cannot be longer than 50 characters'
 		});
 
-		if (isValid) {
-			// Proceed with form submission (AJAX or regular form submit)
-			var first_name = $('#first_name').val().trim();
-			// AJAX call for updating the first name
-			$.ajax({
-				type: 'POST',
-				url: '<?php echo base_url('user/update_first_name/' . $user['user_id']); ?>', // CI controller method
-				data: {
-					first_name: first_name
-				},
-				success: function(response) {
-					if (response.status == 'success') {
-						alert('Your firstname has been successfully updated!');
-						window.location.href = "<?php echo current_url(); ?>";
-					} else {
-						alert('Error updating information!');
-						window.location.href = "<?php echo current_url(); ?>";
-					}
-				}
-			});
-		} else {
+		if (!isValid) {
 			alert('Form validation failed. Please check the input.');
+			return;
 		}
+		const first_name = $('#first_name').val().trim();
+		fetch('<?php echo base_url('user/update_first_name/' . $user['user_id']); ?>', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: new URLSearchParams({
+					first_name: first_name
+				})
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.status === 'success') {
+					alert('Your firstname has been successfully updated!');
+					window.location.href = "<?php echo current_url(); ?>";
+				} else {
+					alert('Error updating information!');
+					window.location.href = "<?php echo current_url(); ?>";
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert('Error updating information!');
+				window.location.href = "<?php echo current_url(); ?>";
+			});
 	}
 
 
-	function submitLastNameForm() {
+	async function submitLastNameForm() {
 		// Apply validation
 		var isValid = validateInput('#last_name', {
 			required: true,
@@ -55,29 +61,31 @@
 			maxLength: 'Last Name cannot be longer than 50 characters'
 		});
 
-		if (isValid) {
-			// Proceed with form submission (AJAX or regular form submit)
-			var last_name = $('#last_name').val().trim();
-			// AJAX call for updating the last name
-			$.ajax({
-				type: 'POST',
-				url: '<?php echo base_url('user/update_last_name/' . $user['user_id']); ?>', // CI controller method
-				data: {
-					last_name: last_name
-				},
-				success: function(response) {
-					if (response.status == 'success') {
-						alert('Your lastname has been successfully updated!');
-						window.location.href = "<?php echo current_url(); ?>";
-					} else {
-						alert('Error updating information!');
-						window.location.href = "<?php echo current_url(); ?>";
-					}
-				}
-			});
-		} else {
+		if (!isValid) {
+
 			alert('Form validation failed. Please check the input.');
+			return;
 		}
+
+		// Proceed with form submission (AJAX or regular form submit)
+		var last_name = $('#last_name').val().trim();
+		// AJAX call for updating the last name
+		$.ajax({
+			type: 'POST',
+			url: '<?php echo base_url('user/update_last_name/' . $user['user_id']); ?>', // CI controller method
+			data: {
+				last_name: last_name
+			},
+			success: function(response) {
+				if (response.status == 'success') {
+					alert('Your lastname has been successfully updated!');
+					window.location.href = "<?php echo current_url(); ?>";
+				} else {
+					alert('Error updating information!');
+					window.location.href = "<?php echo current_url(); ?>";
+				}
+			}
+		});
 	}
 
 	function submitUsernameForm() {
