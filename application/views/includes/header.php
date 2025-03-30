@@ -40,7 +40,7 @@
 	</script>
 </head>
 
-<body hx-boost="true">
+<body>
 	<nav class="navbar navbar-expand-lg bg-body-tertiary">
 		<div class="container">
 			<a class="navbar-brand" href="<?= base_url('') ?>">
