@@ -1,5 +1,3 @@
-
-
 <?php
 
 /**
@@ -8,12 +6,11 @@
 class CaptchaController extends CI_Controller
 {
 
-
-
-
 	public function index()
 	{
 		$maxnumber = 100000;
+
+
 
 		// Generate a random salt (recommended length: at least 10 characters)
 		$salt = bin2hex(random_bytes(10)); // Generates a 20-character hex string
