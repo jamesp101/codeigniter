@@ -139,13 +139,17 @@
 					<tr>
 						<td>📄 <?= $documentation['File_Title']; ?></td>
 						<td><?= $documentation["Date_Uploaded"]; ?></td>
+
 						<td>
-							<a href="<?= site_url('documentations/view/' . $documentation['File_ID']) ?>" class="btn btn-warning" target="_blank">
-								<span class="glyphicon glyphicon-eye-open"></span> View
+
+							<a href="<?= site_url('documentations/view/' . $documentation['File_ID']) ?>"
+								class="btn btn-outline-primary" target="_blank">
+								<span class="fa fa-eye"></span>
 							</a>
+
 							<?php if ($this->session->userdata('role') === 'Document Controller'): ?>
-								<button class="btn btn-danger btn-delete" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
-									<span class="glyphicon glyphicon-trash"></span> Delete
+								<button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
+									<i class="fa fa-trash"></i>
 								</button>
 								<div class="modal fade" id="modal_delete_documentation<?php echo $documentation['File_ID']; ?>" aria-labelledby="addDocumentationLabel" aria-hidden="true">
 									<div class="modal-dialog modal-dialog-centered">
