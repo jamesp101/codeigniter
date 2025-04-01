@@ -165,6 +165,8 @@ $route['documentations/delete_folder/(:num)'] = 'common/documentations/delete_fo
 $route['documentations/get_users_access/(:num)'] = 'common/documentations/get_users_access/$1';
 $route['documentations/add_user_access/(:num)/(:num)']['POST'] = 'common/documentations/add_user_access/$1/$2';
 $route['documentations/remove_user_access/(:num)/(:num)']['POST'] = 'common/documentations/remove_user_access/$1/$2';
+$route['documentations/archive/(:num)']['POST'] = 'common/documentations/archive_document/$1';
+$route['documentations/unarchive/(:num)']['POST'] = 'common/documentations/unarchive_document/$1';
 
 // events
 $route['events/add_event']['POST'] = 'common/EventController/add_event';

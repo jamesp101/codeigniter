@@ -58,6 +58,7 @@ class Documentations extends MY_Controller
 			return [
 				'id' => $row['id'],
 				'name' => $row['name'],
+				'is_archived' => $row['is_archived'],
 				'created_at' => $row['created_at'],
 				'access' => $row['access_list'] !== NULL
 					? explode(',', $row['access_list'])
@@ -402,6 +403,27 @@ class Documentations extends MY_Controller
 
 		$this->output->set_content_type(200)->set_output(json_encode(['success' => true]));
 	}
+
+	public function archive_document($folder_id)
+	{
+		$this->db
+			->update('folders', [
+				'is_archived' => true
+			], ['id' => $folder_id]);
+
+		redirect('/documentations?success=archived');
+	}
+
+	public function unarchive_document($folder_id)
+	{
+		$this->db
+			->update('folders', [
+				'is_archived' => false
+			], ['id' => $folder_id]);
+
+		redirect('/documentations?success=unarchived');
+	}
+
 	public function remove_user_access($folder_id, $user_id)
 	{
 		$this->db

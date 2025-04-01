@@ -2,13 +2,44 @@
 
 <?php
 $errors = explode(',', $this->input->get('errors'));
+$success = explode(',', $this->input->get('success'));
 ?>
+
+<?php if (!empty(array_intersect(['archived', 'unarchived'], $success))): ?>
+
+	<div class="toast position-fixed top-5 bottom-0 end-50 translate-middle-x p-2  mb-2  bg-success text-white hidden" id="archived-toast">
+		<span class="fa fa-check" /> Successfully Archived Folder
+	</div>
+
+	<div class="toast position-fixed top-5 bottom-0 end-50 translate-middle-x p-2  mb-2  bg-success text-white hidden" id="unarchived-toast">
+		<span class="fa fa-check" />
+		Successfully Unarchivved Folder
+	</div>
+
+	<script>
+		const loadSuccess = () => {
+			const successMessage = "<?= $success[0] ?>";
+
+			const toastEl = document.getElementById(
+				`${successMessage}-toast`
+			)
+
+			toastEl.classList.remove('hidden')
+
+			const toast = new bootstrap.Toast(toastEl)
+			toast.show()
+
+		}
+		document.onload = loadSuccess()
+	</script>
+<?php endif ?>
 
 
 <?php if (in_array('accessdenied', $errors)): ?>
 	<div class="toast position-fixed top-5 bottom-0 start-50 translate-middle-x p-2  mb-2  bg-danger text-white" id="toast">
 		⚠️ You don't have access to those files ⚠️
 	</div>
+
 	<script>
 		function toastLoad() {
 			window.onload = function() {
@@ -27,11 +58,14 @@ $errors = explode(',', $this->input->get('errors'));
 	}
 
 	document.archiveDocument = async (id) => {
-		const archive = await fetch();
+		const archive = await fetch(`/documentations/archive/${id}`);
 	}
 </script>
 
+
 <div class="" style="margin-top:25px;">
+
+
 	<!-- Modal -->
 	<div class="modal fade" id="addEManual" tabindex="-1" aria-labelledby="addEManualLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -172,7 +206,8 @@ $errors = explode(',', $this->input->get('errors'));
 					<tr>
 						<td>
 							<a href="<?= site_url('/documentations/folder/' . $folder['id']); ?>">
-								📁 <?= $folder['name']; ?>
+								<?php $is_archived_string = $folder['is_archived'] ? ' [ARCHIVED] ' : ''; ?>
+								<?= '📁 ' . $is_archived_string .  $folder['name']; ?>
 							</a>
 						</td>
 						<td><?= $folder["created_at"]; ?></td>
@@ -181,36 +216,82 @@ $errors = explode(',', $this->input->get('errors'));
 						</td>
 						<?php if ($this->session->userdata('role') === 'Document Controller'): ?>
 							<td>
-								<button class="btn btn-outline-primary" data-bs-toggle="modal"
-									data-bs-target="#EditAccess<?= $folder['id'] ?>">
-									<span class=" fa fa-building" />
-								</button>
-								<button class="btn btn-outline-primary"
-									hx-get="/documentations/get_users_access/<?= $folder['id'] ?>"
-									hx-swap="outerHTML"
-									hx-target="#users-list"
-									hx-indicator="#EditUserLoadingoutline-secondary"
-									data-bs-toggle="modal"
-									onclick="removeUserList()"
-									data-bs-target="#EditUserAccess">
-									<span class=" fa fa-user" />
-								</button>
 
+								<?php if (!$folder['is_archived']): ?>
+									<button class="btn btn-outline-primary" data-bs-toggle="modal"
+										data-bs-target="#EditAccess<?= $folder['id'] ?>">
+										<span class=" fa fa-building" />
+									</button>
+									<button class="btn btn-outline-primary"
+										hx-get="/documentations/get_users_access/<?= $folder['id'] ?>"
+										hx-swap="outerHTML"
+										hx-target="#users-list"
+										hx-indicator="#EditUserLoadingoutline-secondary"
+										data-bs-toggle="modal"
+										onclick="removeUserList()"
+										data-bs-target="#EditUserAccess">
+										<span class=" fa fa-user" />
+									</button>
+								<?php endif ?>
 
-								<button class="btn btn-outline-secondary"
-									data-bs-toggle="modal"
-									data-bs-target="#modal_delete<?= $folder['id'] ?>">
-									<span class="fa fa-archive" />
-								</button>
+								<?php if ($folder['is_archived'] == false): ?>
 
-								<button class="btn btn-danger"
-									data-bs-toggle="modal"
-									data-bs-target="#modal_delete<?= $folder['id'] ?>">
-									<span class=" fa fa-trash" />
-								</button>
+									<button class="btn btn-outline-secondary"
+										data-bs-toggle="modal"
+										data-bs-target="#archive-document-<?= $folder['id'] ?>">
+										<span class="fa fa-archive" />
+									</button>
+
+								<?php else: ?>
+
+									<button class="btn btn-secondary"
+										data-bs-toggle="modal"
+										data-bs-target="#unarchive-document-<?= $folder['id'] ?>">
+										<span class="fa fa-archive" />
+									</button>
+								<?php endif ?>
+
+								<?php if (!$folder['is_archived']): ?>
+									<button class="btn btn-danger"
+										data-bs-toggle="modal"
+										data-bs-target="#modal_delete<?= $folder['id'] ?>">
+										<span class=" fa fa-trash" />
+									</button>
+
+								<?php endif ?>
 							</td>
 						<?php endif; ?>
 
+						<div class="modal fade" id="archive-document-<?= $folder['id'] ?>" tabindex="-1" aria-labelledby="archiveDocument" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<h3> Are you sure you want to archive this folder </h3>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+
+										<?= form_open_multipart('documentations/archive/' . $folder['id']); ?>
+										<button type="submit" class="btn btn-primary">Archive</button>
+										<?= form_close(); ?>
+
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="modal fade" id="unarchive-document-<?= $folder['id'] ?>" tabindex="-1" aria-labelledby="archiveDocument" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<h3> Are you sure you want to unarchive this folder </h3>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+
+										<?= form_open_multipart('documentations/unarchive/' . $folder['id']); ?>
+										<button type="submit" class="btn btn-primary">Unarchive</button>
+										<?= form_close(); ?>
+									</div>
+								</div>
+							</div>
+						</div>
 
 
 						<!-- Modal -->
