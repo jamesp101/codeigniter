@@ -76,14 +76,18 @@
 		<h2> Documentations</h2>
 
 		<?php $allowed_roles = ['Document Controller', 'Director for QAIE', 'QAIE Management Officer']; ?>
-		<?php if (in_array($this->session->userdata('role'), $allowed_roles)): ?>
-			<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDocumentation">
-				Add Documentation
-			</button>
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubfolder">
-				Add Subfolder
-			</button>
 
+		<?php if (in_array($this->session->userdata('role'), $allowed_roles)): ?>
+			<?php if (!$current_folder['is_archived']): ?>
+
+				<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDocumentation">
+					Add Documentation
+				</button>
+				<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubfolder">
+					Add Subfolder
+				</button>
+
+			<?php endif; ?>
 		<?php endif; ?>
 
 		<?php if ($this->session->flashdata('error')) {
@@ -149,12 +153,12 @@
 
 							<?php if ($this->session->userdata('role') === 'Document Controller'): ?>
 
-								<button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
-									<i class="fa fa-archive"></i>
-								</button>
-								<button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
-									<i class="fa fa-trash"></i>
-								</button>
+								<?php if (!$current_folder['is_archived']): ?>
+									<button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modal_delete_documentation<?= $documentation['File_ID'] ?>">
+										<i class="fa fa-trash"></i>
+									</button>
+								<?php endif; ?>
+
 								<div class="modal fade" id="modal_delete_documentation<?php echo $documentation['File_ID']; ?>" aria-labelledby="addDocumentationLabel" aria-hidden="true">
 									<div class="modal-dialog modal-dialog-centered">
 										<div class="modal-content">
