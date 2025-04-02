@@ -48,6 +48,7 @@ class Documentations extends MY_Controller
 			->join('folder_access', 'folders.id = folder_access.folder_id', 'left')
 			->join('z_office', 'folder_access.ID_Office = z_office.ID_Office', 'left')
 			->join('user_folder_access', 'user_folder_access.folder_id = folders.id', 'left')
+			->where('folders.parent_id', NULL)
 			->group_by('folders.id', NULL)
 			->get()
 			->result_array();
